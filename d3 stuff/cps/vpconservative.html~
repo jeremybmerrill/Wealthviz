@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Administration Spending Bar Chart</title>
+    <script type="text/javascript" src="../d3.js"></script>
+    <script type="text/javascript" src="../d3.csv.js"></script>
+    <script type="text/javascript" src="../d3.layout.js"></script>
+    <script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../lib/qtip/jquery.qtip-1.0.0-rc3.min.js"></script>
+    <style type="text/css">
+
+body {
+  font: 12px sans-serif;
+}
+
+svg {
+  shape-rendering: crispEdges;
+}
+.infobox{
+  font: 16px serif;
+}
+
+    </style>
+  </head>
+  <body>
+<div id="chart">
+    <script type="text/javascript">
+
+baseFunction = function(d,i){ return d.Base; };
+totalCompFunction = function(d,i){ return d.TotalComp; };
+var compFunction;
+compFunction = baseFunction;
+
+var schoolColors = [{"School":"CMC", "Color":"Maroon"}, 
+                    {"School":"Scripps", "Color":"DarkGreen"}, 
+                    {"School":"Pitzer", "Color":"DarkOrange"}, 
+                    {"School":"Pomona", "Color":"Blue"}, 
+                    {"School":"HMC", "Color":"#cc9933"}];
+
+    var schoolColorDict = {};
+    for (i in schoolColors){
+        schoolColorDict[schoolColors[i]["School"]] = schoolColors[i]["Color"];
+    }
+
+var data; //hooray scope!
+
+d3.csv("a.csv", function(csv){
+    data = csv.filter(function(d){ return d["Position"].indexOf("VP") == 0;});
+    //data = data.sort(function(d1, d2){ return d2.Base - d1.Base}); //TODO: Sort these by college total (so bar graph is on downward slope.)
+    var collegesSoFar = {};
+    /*data = data.filter(function(d, i){ 
+                        var x = d["College"] in collegesSoFar;
+                        collegesSoFar[d["College"]] = "";
+                        return !x; });*/
+    data = data.filter(function(d){ return d["College"] != "Other"}); //only 5Cs
+    
+    data.forEach(function(d,i) {
+    });
+    drawGraph(data);
+});
+
+function cleanName(name){
+    //Cleans a name (e.g. John Q. O'Panda-Faranda) into something fit for an id, e.g. JohnQOPandaFaranda
+    return name.replace("-","").replace(/ /g,"").replace(".","").replace("'","");
+}
+
+function schoolColor(school){
+    if (school in schoolColorDict){
+        return schoolColorDict[school];
+    }else{
+        return "Black"
+    }
+}
+var college_x_dict = {"None": 0}; //the lexical x value for the college (e.g. for five elements, returns 1 -5)
+function college_x(college){
+    if (college in college_x_dict){
+        return college_x_dict[college] - 1;
+    }else{
+        new_x = d3.max(d3.values(college_x_dict)) + 1;
+        college_x_dict[college] = new_x;
+        return new_x - 1;
+    }
+}
+var college_elements = {};
+
+function drawGraph(data){
+    var h = 550,
+        w = 500,
+        y = d3.scale.linear().domain([0, 2000000]).range([0, h]),
+        x = d3.scale.ordinal().domain(d3.range(jQuery.unique(data.map(function(d){ return d.College;})).length)).rangeBands([0, w], .2);
+
+    var current_height_dict = {}; //the height to start the next block for this college.
+
+    function current_height(college){ //getter / init'er
+        if (college in current_height_dict){
+            return current_height_dict[college];
+        }else{
+            current_height_dict[college] = h;
+            return h;
+        }
+    }
+    var vis = d3.select("#chart")
+      .append("svg:svg")
+        .attr("height", h + 40)
+        .attr("width", w + 80)
+        .attr("id", "vpchart")
+      .append("svg:g")
+        .attr("transform", "translate(100,0)");
+
+    /* Base comp bars */
+    var bars = vis.selectAll("svg#vpchart")
+        .data(data)
+        .enter()
+        .append("svg:g")
+        .attr("transform", "translate(0,22)")
+        .attr("class", "bar");
+    bars.append("svg:rect")
+        .attr("width", x.rangeBand())
+        .attr("fill", function(d,i){return schoolColor(d.College);})
+        .attr("x", function(d,i){ return college_x(d.College) * 70 + 15;})
+        /*.attr("y", h) // for fun animation where bars start at zero and grow to full size at loadtime.
+        .attr("height", 0) */
+        .attr("y", function(d) {    new_y = current_height(d.College) - y(compFunction(d));
+                                    current_height_dict[d.College] = new_y;
+                                    return new_y + .5; } )
+        .attr("height", function(d) { return y(compFunction(d)) - .5;})
+        .attr("class", function(d){ elementsSoFar = college_elements[d.College] || 0;
+                                    college_elements[d.College] = elementsSoFar + 1;
+                                    return ['bar', cleanName(d.College), cleanName(d.College) + "-" + elementsSoFar, 'bar-' + college_x(d.College)].join(" "); })
+        .attr("id", function(d){return cleanName(d.Person); }) //TODO: put this replace function in a utils files somewhere
+        .on("click", function(d, i){ doInfobox(d, x.rangeBand(), y(compFunction(d))) ;});
+
+    bars.append("svg:line") /* lines separating bar components (later obsolete due to shading? Maybe not.) */
+        .attr("y1", function(d) { return d3.select("#" + cleanName(d.Person)).attr("y"); } )
+        .attr("y2", function(d) { return d3.select("#" + cleanName(d.Person)).attr("y"); } )
+        .attr("x1", function(d,i){ return (college_x(d.College) * 70 + 15);} )
+        .attr("x2", function(d,i){ return (college_x(d.College) * 70) + x.rangeBand() + 15;} )
+        .attr("z", 5)
+        .attr("class", function (d) { return 'separator separator-' + college_x(d.College); })
+        .attr("stroke", "black");
+       /*.transition()
+         .delay(function(d, i) { return i * 10; })
+         .attr("y", y1)
+         .attr("height", function(d) { return y0(d) - y1(d); });*/
+
+    var rules = vis.selectAll("g.rule") //scale
+        .data(y.ticks(10))
+      .enter().append("svg:g")
+        .attr("class", "rule")
+        .attr("transform", function(d) { return "translate(0," + (-y(d) + 20) + ")"; });
+
+    rules.append("svg:line") //ticks
+        .attr("y1", h)
+        .attr("y2", h)
+        .attr("x1", 0)
+        .attr("x2", 6)
+        .attr("stroke", "black");
+
+    /*rules.append("svg:line") // visual white line things
+        .attr("x1", 0)
+        .attr("x2", w)
+        .attr("y1", h)
+        .attr("y2", h)
+        .attr("stroke", "white")
+        .attr("stroke-opacity", .3);*/
+
+    numerical_labels = rules.append("svg:text") //numerical tick labels.
+        .attr("y", h + 4)
+        .attr("x", "-3em")
+        .attr("text-anchor", "middle")
+        .text(y.tickFormat(10));
+
+    vis.append("svg:line") // line between A-J and hte bars.
+        .attr("y1", 20)
+        .attr("y2", h + 20)
+        .attr("stroke", "black");
+
+    drawLegend(h, w);
+}
+
+//TODO: Actually call drawLegend
+function drawLegend(myh, myw){ //w and h are the w and h of the graph as it is currently drawn.
+    legendx = .85 * myw;
+    legendy = .15 * myh;
+    var vis = d3.select("svg#vpchart")
+    var legends = vis.selectAll("g.legend")
+        .attr("x", legendx)
+        .attr("y", legendy)
+        .attr("text-anchor", "end")
+        .data(schoolColors)
+        .enter()
+        .append("svg:g")
+        .attr("class", "legend");
+    legends.append("svg:rect")
+            .attr("x", legendx)
+            .attr("y", function(datum, index) { return legendy + index * 25 })
+            .attr("height", 20)
+            .attr("width", 20)
+            .attr("fill", function(datum){ return datum["Color"]; } )
+
+    legends.append("svg:text")
+        .attr("x", legendx + 25)
+        .attr("y", function(datum, index) { return legendy + index * 25 + 12})
+        .text(function(datum){ return datum["School"]; } );
+}
+
+function commaFormatted(amount){
+    amount = String(Array(String(amount)).reverse());
+    newstring = Array();
+    for (var i = 0; i < amount.length; i++){
+        newstring.push(amount[i]);
+        if (i % 3 == 2 && i != amount.length - 1){
+            newstring.push(",")
+        }
+    }
+    return "$" + String(newstring.join(""));
+}
+function toggleComp() { //take the proper version of includeOthers and compFunction as arguments, change them in link target when clicked.
+    if(compFunction == totalCompFunction){
+        compFunction = baseFunction;
+    }else{
+        compFunction = totalCompFunction;
+    }
+    var h = 550,
+        y = d3.scale.linear().domain([0, 2000000]).range([0, h]);
+
+    function getY(d){
+        //what number am i?
+        myElem = d3.select("#" + cleanName(d.Person));
+        myClasses = myElem.attr("class").split(" ")
+        alert(myClasses)
+        //what's the total space taken up by the folks with lower numbers than me?
+        return h - y(compFunction(d)) - .5; }
+    }
+
+    d3.selectAll("rect.bar")
+       .data(data)
+        .transition().duration(1000)
+        .attr("height", function(d){ return y(compFunction(d)); })
+        .attr("y", getY(d));
+}
+
+function doInfobox(d,width,height){ //width = distance to displace tooltip rightwards, height of the element
+
+    /* I think this is actually unnecessary...
+    for(i = college_x(d.College) + 1; i < jQuery.unique(data.map(function(d){ return d.College;})).length; i++){
+        d3.selectAll("rect.bar-" + i).transition().duration(500)
+            .attr("x", (i * (width + 15) + 100)); //move 100px to the right (other methods, eg translate, didn't work, hence, hacky workaround)
+        d3.selectAll("line.separator-" + i).transition().duration(500)
+            .attr("x1", (i * (width + 15) + 100))
+            .attr("x2", (i * (width + 15) + 100 + width)); 
+
+    }*/
+    var contentstring = [d.Position + ", " + d.College, "Base salary: " + commaFormatted(d.Base), "Total compensation: " + commaFormatted(d.TotalComp)].join("<br />");
+    jQuery("#" + cleanName(d.Person)).qtip({
+        content: {text: contentstring, title: {text: d.Person, button: 'Close'} },
+        position: {
+           target: jQuery("#" + cleanName(d.Person)),
+           corner: {
+              target: 'rightMiddle', 
+              tooltip: 'leftMiddle',
+           },
+            adjust: {x: width, y: height / 2},
+        },
+        style: {tip: 'leftMiddle'},
+        show: {ready: true, when: {event: 'click'}},
+        hide: {fixed: true, when: {event: 'mouseout'}},
+    });
+}
+
+    </script>
+    </div>
+    <div>
+    <a href="#" onclick="toggleComp()">Toggle Base/Total Compensation</a>
+    </div>
+  </body>
+</html

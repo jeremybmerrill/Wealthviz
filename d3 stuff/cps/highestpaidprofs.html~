@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Highest Paid Profs Bar Chart</title>
+    <script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../d3.js"></script>
+    <script type="text/javascript" src="../d3.csv.js"></script>
+    <script type="text/javascript" src="salaryvizutils.js"></script>
+    <link rel="stylesheet" href="salaryviz.css">
+    <style type="text/css">
+
+body {
+  font: 12px sans-serif;
+}
+
+svg {
+  shape-rendering: crispEdges;
+}
+.infobox{
+  font: 16px serif;
+}
+
+    </style>
+  </head>
+  <body>
+    <div id="highestpaidprofs-chart" class="chart" style="position: relative; height: 550px;">
+    <script type="text/javascript" src="highestpaidprofs.js"></script>
+        <div id="pres-toggle" class="toggleComp"><a href="#">Switch to Total Compensation</a></div>
+        <script type="text/javascript">
+          jQuery('.toggleComp').click(function(){
+            toggleComp();
+	          var newtext = jQuery('.toggleComp a').text() == 'Switch to Total Compensation' ? 'Switch to Base Compensation' : 'Switch to Total Compensation';
+            jQuery('.toggleComp a').text(newtext);
+          });
+        </script>
+    </div>
+  </body>
+</html>

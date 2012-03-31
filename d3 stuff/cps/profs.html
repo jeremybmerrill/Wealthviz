@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bar Chart</title>
+    <script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../d3.js"></script>
+    <script type="text/javascript" src="../d3.csv.js"></script>
+    <script type="text/javascript" src="salaryvizutils.js"></script>
+    <link rel="stylesheet" href="salaryviz.css">
+    <style type="text/css">
+
+body {
+  font: 10px sans-serif;
+}
+
+svg {
+  shape-rendering: crispEdges;
+}
+
+    </style>
+  </head>
+  <body>
+    <div id="profs-chart" class="chart" style="position: relative; height: 480px;">
+    <script type="text/javascript" src="profs.js"></script>
+        <div id="pres-toggle" class="toggleComp" style="top: inherit; bottom: 70px; left: 330px;"><a href="#">Switch to Total Compensation</a></div>
+        <script type="text/javascript">
+          jQuery('.toggleComp').click(function(){
+            toggleCompProfs();
+	          var newtext = jQuery('.toggleComp a').text() == 'Switch to Total Compensation' ? 'Switch to Base Compensation' : 'Switch to Total Compensation';
+            jQuery('.toggleComp a').text(newtext);
+          });
+        </script>
+    </div>
+  </body>
+</html>

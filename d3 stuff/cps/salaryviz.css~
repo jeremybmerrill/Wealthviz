@@ -1,0 +1,41 @@
+svg {
+  shape-rendering: crispEdges;
+}
+body svg{
+  font: 12px sans-serif;
+}
+div.chartContainer{
+    float: right;
+}
+div.chartContainer h2{
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+a:link, a:visited{
+    color: blue;
+}
+
+/* Awesome funky stuff for positioning chart mechanics (buttons 'n' shit) */
+.toggleComp{
+  font-size: 16px;
+  font-family: serif;
+  position: absolute;  
+  top: 20px; 
+  left: 300px;
+}
+#presidents-chart .toggleComp{
+  left: 410px;
+}
+.switchLabel{
+  font-size: 16px;
+  font-family: serif;
+  position: absolute; 
+  top: 55px; 
+  left: 410px;
+}
+.iSwitch{
+  position: absolute; 
+  top: 50px; 
+  left: 550px;
+}

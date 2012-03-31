@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>All Them Charts</title>
+    <script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../d3.js"></script>
+    <script type="text/javascript" src="../d3.csv.js"></script>
+    <script type="text/javascript" src="../d3.layout.js"></script>
+    <script type="text/javascript" src="../lib/qtip/jquery.qtip-1.0.0-rc3.min.js"></script>
+    <script type="text/javascript" src="../ajax-switch/jquery.iphone-switch.js"></script>
+    <script type="text/javascript" src="salaryvizutils.js"></script>
+    <link rel="stylesheet" href="salaryviz.css">
+
+    <style type="text/css">
+body{
+  margin-left: auto;
+  margin-right: auto;
+  width: 800px;
+}
+
+.chart{
+  margin-bottom: 50px;
+  float: right;
+}
+    
+    </style>
+  </head>
+  <body>
+    <h1>These Are Awesome Charts, Yo</h1>
+    <p class="article">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean varius hendrerit enim et vestibulum. Sed vitae aliquam orci. Donec id elit orci, sed porttitor elit. Nulla in quam elit. Aliquam pulvinar lacinia tortor vitae dictum. In sit amet condimentum risus. Integer non ante tortor, sed tempor dui. Vestibulum scelerisque porta enim, sed rutrum nisi vehicula in. Phasellus vel metus vel ligula lobortis rhoncus ultricies eu elit. Nunc venenatis rhoncus nunc. In nec est dolor, quis cursus eros. In vel turpis nec velit accumsan varius. Duis eget enim risus. Cras non lacus eu augue laoreet semper non nec lorem.
+    </p>
+    <p class="article">Quisque iaculis iaculis tellus, nec consectetur orci fermentum id. Nullam tortor tellus, vehicula quis accumsan eu, commodo vel mauris. Cras leo mauris, porta sed interdum non, commodo at nunc. Maecenas convallis dolor et massa rutrum at aliquam est adipiscing. Pellentesque id nisi sed purus imperdiet adipiscing ornare in ligula. Etiam non lectus lorem. Proin suscipit purus vitae velit pulvinar ultrices. Mauris lacinia feugiat justo quis pulvinar.
+    </p>
+    <div id="presidents-chart-container" class="chartContainer">
+      <h2>5C Presidents</h2>
+      <div id="presidents-chart" class="chart" style="position: relative; height: 580px;">
+          <script type="text/javascript" src="presidents.js"></script>
+          <div id="pres-toggle" class="toggleComp" style="left: 410px;"><a href="javascript:void(0)">Switch to Total Compensation</a></div>
+          <script type="text/javascript">
+            jQuery('#presidents-chart .toggleComp').click(function(){
+              toggleCompPresidents();
+	            var newtext = jQuery('#presidents-chart .toggleComp a').text() == 'Switch to Total Compensation' ? 'Switch to Base Compensation' : 'Switch to Total Compensation';
+              jQuery('#presidents-chart .toggleComp a').text(newtext);
+            });
+          </script>
+
+          <div id="iSwitch-pres-label" class="switchLabel">Peer Institutions: </div>
+          <div id="iSwitch-pres" class="iSwitch" >
+              <script type="text/javascript">
+              $('#iSwitch-pres').iphoneSwitch("off",function() {toggleOthers()}, function() { toggleOthers() }, { switch_on_container_path: '../ajax-switch/iphone_switch_container_off.png',  switch_off_container_path: '../ajax-switch/iphone_switch_container_on.png', switch_path: '../ajax-switch/iphone_switch.png',});
+              </script>
+          </div>
+      </div>
+    </div>
+    <p class="article">Morbi in dui a sapien ullamcorper consectetur. Cras dui nisi, consequat id porta sed, ullamcorper quis ante. Sed eget leo justo. In consectetur egestas massa scelerisque feugiat. Curabitur rutrum tempus orci, et egestas libero faucibus eget. Sed et quam rutrum libero interdum auctor. Vivamus rhoncus massa in urna rhoncus lacinia. Vestibulum quis adipiscing tortor. Nulla pulvinar tellus quis dolor auctor tincidunt gravida nisi porttitor. Aliquam pellentesque, dui non accumsan scelerisque, quam mi suscipit risus, eu bibendum mi magna ut lorem. Etiam sed mauris id sapien ultrices sodales et at nunc. Sed vel diam eget nulla sollicitudin consequat sit amet ut nunc. Nam ornare lorem ac turpis pellentesque lacinia. Duis mi arcu, luctus a pretium ut, euismod a leo. Phasellus at ipsum at dolor posuere vehicula id ac odio. Etiam suscipit erat in mi accumsan sit amet adipiscing est sodales.
+    </p>
+    <p class="article">Fusce sed quam sit amet libero euismod dictum. In hac habitasse platea dictumst. Sed nec est nibh. Phasellus sed rhoncus lorem. Etiam sit amet diam mauris, eget dapibus est. Vivamus euismod venenatis mauris scelerisque ornare. Phasellus suscipit lobortis iaculis. Nunc sed felis nulla, sed semper lorem. Nulla dictum adipiscing volutpat. Nulla faucibus hendrerit erat, eget fermentum sapien aliquet nec. Duis mauris odio, commodo vitae malesuada eu, lacinia id turpis.
+    </p>
+    <div id="presidents-chart-container" class="chartContainer">
+      <h2>Administrative Spending (VP Salaries)</h2>
+      <div id="vp-chart" class="chart" style="position: relative; height: 580px;">
+          <script type="text/javascript" src="vp.js"></script>
+          <div id="pres-toggle" class="toggleComp" ><a href="javascript:void(0)">Switch to Total Compensation</a></div>
+            <script type="text/javascript">
+              jQuery('#vp-chart .toggleComp').click(function(){
+                toggleCompVP();
+	              var newtext = jQuery('#vp-chart .toggleComp a').text() == 'Switch to Total Compensation' ? 'Switch to Base Compensation' : 'Switch to Total Compensation';
+                jQuery('#vp-chart .toggleComp a').text(newtext);
+              });
+            </script>
+          </div>
+      </div>
+    </div>
+    <p class="article">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla sagittis blandit nisi, et rutrum nibh hendrerit quis. Maecenas consectetur facilisis tellus nec pellentesque. Maecenas nisl lacus, posuere in elementum sed, eleifend id felis. Curabitur mi leo, faucibus id interdum quis, dictum eget sapien. Nam dignissim ipsum at quam sollicitudin ac fringilla eros scelerisque. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.
+    </p>
+    <p class="article">Vestibulum at ligula mi. Suspendisse non mi ut massa aliquam pellentesque varius non orci. Duis eros felis, rutrum ac mattis sodales, condimentum in tortor. Duis porttitor pretium placerat. Pellentesque interdum vulputate adipiscing. Quisque elementum interdum turpis, vel ultrices nunc accumsan at. Curabitur ac eros felis. Quisque odio lectus, consectetur et tempor vel, lobortis vitae ligula. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec non ultricies justo. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nullam sit amet consequat lectus. Nam in vehicula magna. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Donec adipiscing aliquam neque, a dapibus quam semper sed.
+    </p>
+    <div id="presidents-chart-container" class="chartContainer">
+      <h2>5C Professors</h2>
+      <div id="profs-chart" class="chart" style="position: relative; height: 580px;">
+      <script type="text/javascript" src="profs.js"></script>
+          <div id="pres-toggle" class="toggleComp" style="top: inherit; bottom: 120px; left: 360px;"><a href="javascript:void(0)">Switch to Total Compensation</a></div>
+          <script type="text/javascript">
+            jQuery('#profs-chart .toggleComp').click(function(){
+              toggleCompProfs();
+	            var newtext = jQuery('#profs-chart .toggleComp a').text() == 'Switch to Total Compensation' ? 'Switch to Base Compensation' : 'Switch to Total Compensation';
+              jQuery('#profs-chart .toggleComp a').text(newtext);
+            });
+          </script>
+      </div>
+    </div>
+    <p class="article">Nam eu tellus lacus, vitae pharetra nulla. Nunc pretium tincidunt auctor. Donec a est enim. Suspendisse auctor ipsum fringilla lorem varius pretium. Nulla non lorem et dolor dictum ornare id eu orci. In hac habitasse platea dictumst. Aenean vel metus metus, sit amet vulputate mi.
+    </p>
+    <p class="article">Phasellus ultrices quam a sem feugiat cursus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Vivamus et rhoncus tortor. Maecenas eleifend, lectus vel dapibus interdum, dui purus sollicitudin ligula, a placerat justo nunc vel tortor. Integer enim lectus, aliquet in tempus a, vestibulum ac ipsum. Nullam rutrum gravida diam, sit amet accumsan dui imperdiet vel. In congue lacus sed ante blandit vulputate.
+    </p>
+    <div id="presidents-chart-container" class="chartContainer">
+      <h2>Highest Paid Professors</h2>
+      <div id="highestpaidprofs-chart" class="chart" style="position: relative; height: 580px;">
+      <script type="text/javascript" src="highestpaidprofs.js"></script>
+          <div id="pres-toggle" class="toggleComp" ><a href="javascript:void(0)">Switch to Total Compensation</a></div>
+          <script type="text/javascript">
+            jQuery('#highestpaidprofs-chart .toggleComp').click(function(){
+              toggleCompHighestPaidProfs();
+	            var newtext = jQuery('#highestpaidprofs-chart .toggleComp a').text() == 'Switch to Total Compensation' ? 'Switch to Base Compensation' : 'Switch to Total Compensation';
+              jQuery('#highestpaidprofs-chart .toggleComp a').text(newtext);
+            });
+          </script>
+      </div>
+    </div>
+    <p class="article">
+Quisque eu dignissim neque. Vestibulum sit amet dolor augue. Quisque in enim libero, a sagittis quam. Etiam sit amet sodales magna. Integer pretium mi sed leo volutpat interdum. Aenean elit est, congue tincidunt molestie in, fermentum eget est. Phasellus imperdiet vestibulum quam, eu vulputate felis interdum tincidunt. Nam dolor arcu, lobortis sed ultricies vitae, suscipit id eros. Nulla adipiscing, augue id lobortis adipiscing, neque tellus fermentum sem, vitae pharetra arcu diam vitae justo. Donec vel sodales eros. Nam viverra sodales lobortis. Morbi lorem turpis, tincidunt suscipit porta sed, bibendum non arcu. Maecenas est libero, placerat sed consequat sit amet, eleifend quis lacus. Vivamus dui nunc, pretium mollis dignissim et, commodo vitae est. Nulla facilisi. Curabitur egestas porta facilisis.
+    </p>
+    <p class="article">
+Cras luctus aliquet est, ac volutpat nisi pretium non. Maecenas quam purus, faucibus a egestas in, accumsan in neque. Vivamus egestas, urna sit amet fermentum auctor, magna dolor luctus tellus, nec elementum justo quam vitae est. Fusce convallis risus rutrum velit porta sagittis sed id magna. Nunc eleifend lorem id arcu imperdiet tincidunt. Sed viverra tempor dignissim. Praesent volutpat vehicula sapien vitae viverra. Suspendisse quis molestie neque. Quisque eu lacus diam. Nulla viverra faucibus cursus. Praesent erat enim, molestie a dapibus sed, tristique vel leo.
+    </p>
+  </body>
+</html>

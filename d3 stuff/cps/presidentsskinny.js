@@ -1,0 +1,325 @@
+var includeOthers = 0; //global setting: to include peer institutions (1)  or not (0);
+
+var totalCompData;
+var dataPresidents;
+var dataWithOthers; //delete this.
+
+var compFunctionPresidents;
+compFunctionPresidents = baseFunction;
+
+d3.csv("a.csv", function(csv){
+    dataWithOthers = csv.filter(function(d, i){ return d["Position"] == "President";}).sort(function(d1, d2){ return d2.Base - d1.Base});
+    dataPresidents = dataWithOthers.filter(function(d, i){ return d["College"] != "Other";});
+    totalCompData = dataPresidents.map(function(d){ return d.TotalComp; }); //this should only exist for purposes of sizing the graph
+    drawAncillary(dataPresidents, baseFunction);
+    drawLegend(550, 600); // these are the first graph's h and w
+    drawBars(baseFunction, 0);
+    //Now we're ready for transitions.
+});
+
+function drawAncillary(dataPresidents, mapFunction){
+    var h = 550,
+        w = 600,
+        y = d3.scale.linear().domain([0, d3.max(totalCompData) * 1.2]).range([0, h]),
+        x = d3.scale.ordinal().domain(d3.range(dataPresidents.length)).rangeBands([0, w - 100], .2);
+
+    var vis = d3.select("#presidents-chart")
+      .append("svg:svg")
+        .attr("height", h + 40)
+        .attr("width", w + 80)
+      .append("svg:g")
+        .attr("transform", "translate(100,0)")
+        .attr("class", "wholechart");
+
+    var defs = vis.append('svg:defs');
+
+    var allpatterns = defs.selectAll("pattern")
+        .data(dataPresidents)
+      .enter().append('svg:pattern')
+        .attr('id', function(d, i) { return "prespic" + d.College ; })
+        .attr('width', 64)
+        .attr('height', 64)
+        .attr('patternUnits', 'objectBoundingBox'); 
+
+    allpatterns.append('svg:image')
+        .attr('width', 64)
+        .attr('height', 64)
+        .attr('xlink:href', 'icon.png');
+
+    var rules = vis.selectAll("g.rule") //scale
+        .data(y.ticks(10))
+      .enter().append("svg:g")
+        .attr("class", "rule")
+        .attr("transform", function(d) { return "translate(0," + (-y(d) + 20) + ")"; });
+
+    rules.append("svg:line") //ticks
+        .attr("y1", h)
+        .attr("y2", h)
+        .attr("x1", 0)
+        .attr("x2", 6)
+        .attr("stroke", "black");
+
+    rules.append("svg:line") // visual white line things
+        .attr("x1", 0)
+        .attr("x2", w)
+        .attr("y1", h)
+        .attr("y2", h)
+        .attr("stroke", "white")
+        .attr("stroke-opacity", .3);
+
+    numerical_labels = rules.append("svg:text") //numerical tick labels.
+        .attr("y", h + 4)
+        .attr("x", "-3em")
+        .attr("text-anchor", "middle")
+        .text(y.tickFormat(10));
+
+    vis.append("svg:line") // line between A-J and hte bars.
+        .attr("y1", 20)
+        .attr("y2", h + 20)
+        .attr("stroke", "black");
+}
+function drawLegend(myh, myw){ //w and h are the w and h of the graph as it is currently drawn.
+    legendx = .85 * myw;
+    legendy = .35 * myh;
+    var vis = d3.select("#presidents-chart g.wholechart")
+    var legends = vis.selectAll("g.legend")
+        .attr("x", legendx)
+        .attr("y", legendy)
+        .attr("text-anchor", "end")
+        .data(schoolColors)
+        .enter()
+        .append("svg:g")
+        .attr("class", "legend");
+    legends.append("svg:rect")
+            .attr("x", legendx)
+            .attr("y", function(datum, index) { return legendy + index * 25 })
+            .attr("height", 20)
+            .attr("width", 20)
+            .attr("fill", function(datum){ return datum["Color"]; } )
+
+    legends.append("svg:text")
+        .attr("x", legendx + 25)
+        .attr("y", function(datum, index) { return legendy + index * 25 })
+        .attr("dy", "12px")
+        .text(function(datum){ return datum["School"]; } );
+
+}
+
+function toggleCompPresidents() { //take the proper version of includeOthers and compFunctionPresidents as arguments, change them in link target when clicked.
+    if(compFunctionPresidents == totalCompFunction){
+        compFunctionPresidents = baseFunction;
+    }else{
+        compFunctionPresidents = totalCompFunction;
+    }
+    var m = 25; 
+    if (includeOthers == 0){
+        var w = 600;
+    }else{
+        var w = 1100;
+    }
+    var h = 550,
+        y = d3.scale.linear().domain([0, d3.max(totalCompData) * 1.2]).range([0, h]),
+        x = d3.scale.ordinal().domain(d3.range(dataPresidents.length)).rangeBands([0, w - 100], .2);
+
+
+    dataPresidents = dataPresidents.sort(function(d1, d2){ return compFunctionPresidents(d2) - compFunctionPresidents(d1)})
+
+    d3.selectAll("#presidents-chart rect.bar")
+       .data(dataPresidents, function(d){ return d.Person; })
+        .transition().duration(1000)
+        .attr("x", function(d,i) { return x(i); })
+        .attr("height", function(d){ return y(compFunctionPresidents(d)); })
+        .attr("y", function(d) { return h - y(compFunctionPresidents(d)) - .5; });
+
+    d3.selectAll("#presidents-chart text.valueLabel") // Numbers on bars.
+       .data(dataPresidents, function(d){ return d.Person; })
+      .transition().duration(1000)
+        .attr("y", function(d) { return h - y(compFunctionPresidents(d)) - .5; })
+        .attr("x", function(d,i) { return x(i) + 12; })
+        .text(function(d){ return "$" + String(~~(compFunctionPresidents(d) / 1000)) + "k" });
+    d3.selectAll("#presidents-chart text.nameLabel") // Numbers on bars.
+       .data(dataPresidents, function(d){ return d.Person; })
+      .transition().duration(1000)
+        .attr("x", function(d,i) { return x(i); })
+
+    d3.selectAll("#presidents-chart text.collegeNameLabel") // Numbers on bars.
+       .data(dataPresidents, function(d){ return d.Person; })
+      .transition().duration(1000)
+        .attr("transform", function(d, i){ return "rotate(270, ".concat(String( x(i) + 45 ), ", ", String(h -10), ")");} )
+        .attr("x", function(d,i) { return x(i) + 45; })
+
+    d3.selectAll("#presidents-chart rect.img") //This is what slows things down.
+      .style("display", "none")
+       .data(dataPresidents, function(d){ return d.Person; })
+      .transition().duration(0).delay(1000)
+        .attr("y", function(d) { return h - y(compFunctionPresidents(d)) + 5.5; })
+        .attr("x", function(d,i) { return x(i) + 6; })
+        .style("display", "block");
+}
+
+
+function toggleOthers(){
+    var h = 550;
+    var w;
+    if (includeOthers == 0){
+        dataPresidents = dataWithOthers;
+        includeOthers = 1;
+        w = 1100; //was 600
+        d3.select("#presidents-chart svg").attr("height", h + 40).attr("width", w + 80) //resize the chart
+    }else{
+        dataPresidents = dataWithOthers.filter(function(d, i){ return d["College"] != "Other";});
+        includeOthers = 0;
+        w = 600;
+        d3.selectAll("#presidents-chart .collegeNameLabel").attr("display", "none");
+        d3.select("#presidents-chart svg").transition().duration(0).delay(1000).attr("height", h + 40).attr("width", w + 80) //resize the chart
+    }
+    var y = d3.scale.linear().domain([0, d3.max(totalCompData) * 1.2]).range([0, h]), //TODO: change the y-scale with toggle (so, without Others, PGann's salary takes up a greater portion of the graph)
+        x = d3.scale.ordinal().domain(d3.range(dataPresidents.length)).rangeBands([0, w - 100], .2);
+
+    dataPresidents = dataPresidents.sort(function(d1, d2){ return compFunctionPresidents(d2) - compFunctionPresidents(d1)})
+
+    d3.selectAll("#presidents-chart g.legend rect").transition().duration(1000)
+        .attr("x", .85 * w);
+    d3.selectAll("#presidents-chart g.legend text").transition().duration(1000)
+        .attr("x", .85 * w + 25);
+
+    var bars = d3.select("#presidents-chart .wholechart").selectAll("g.bar")
+       .data(dataPresidents, function(d){ return d.Person; });
+
+    bars.select("rect.bar").transition().duration(1000)
+        .attr("x", function(d,i) { return x(i); });
+
+    bars.select("text.valueLabel").transition().duration(1000)
+        .attr("x", function(d,i) { return x(i) + 12; });
+    bars.select("text.nameLabel").transition().duration(1000)
+        .attr("x", function(d,i) { return x(i); });
+
+    bars.select("rect.img") //This is what slows things down.
+      .style("display", "none")
+      .transition().duration(0).delay(1000)
+        .attr("y", function(d) { return h - y(compFunctionPresidents(d)) + 5.5; })
+        .attr("x", function(d,i) { return x(i) + 6; })
+        .style("display", "block");
+
+    newbars = bars.enter().append("svg:g")
+        //.attr("id", function(d){return "Presidents" + cleanName(d.Person); })
+        .attr("class", "bar") //This is the group containing the bar itself, the image, etc.
+        .attr("transform", function(d, i) { return "translate(0,20)"; })
+        .attr("x", function(d,i) { return x(i); });
+        
+    newbarsbars = newbars.append("svg:rect") /* add new bars, magically in place */
+        .attr("class", "bar")
+        .attr("fill", function(d,i){ return schoolColor(d.College);})
+        .attr("height", 0)
+        .attr("x", function(d,i) { return x(i); })
+        .attr("y", function(d,i) { return h + .5; })
+        .attr("width", x.rangeBand());
+    newbarsbars.transition().duration(1000)
+        .attr("x", function(d,i) { return x(i); })
+        .attr("height", function(d,i) { return y(compFunctionPresidents(d)); })
+        .attr("y", function(d,i) { return h - y(compFunctionPresidents(d)) + .5; })
+
+    newbars.append("svg:text") // Numbers on bars.
+        .attr("y", h)
+        .attr("x", function(d,i) { return x(i) + 12; })
+        .attr("class", "valueLabel")
+        .attr("fill", "white")
+        .attr("dy", function(d) { if(d.College != "Other"){ return 100; }else{ return 20; }})
+        .attr("text-anchor", "start")
+        .attr("font-size", "1.5em")
+        .text(function(d){ return "$" + String(~~(compFunctionPresidents(d) / 1000)) + "k" })
+        .transition().duration(1000)
+        .attr("y", function(d) { return h - y(compFunctionPresidents(d)) - .5; });
+    newbars.append("svg:text") //name labels
+        .attr("y", h + 12)
+        .attr("x", function(d,i) { return x(i); })
+        .attr("class","nameLabel")
+        .attr("text-anchor", "start")
+        //.attr("transform", "rotate(20)")
+        .text( function(d) { return d.Person; } ); // this sets the name under the bars.
+    newbars.append("svg:text") //college name labels (e.g. Columbia)
+        .attr("class","collegeNameLabel")
+        .attr("font-size", "2.5em")
+        .attr("fill", "white")
+        .attr("text-anchor", "start")
+        .attr("transform", function(d, i){ return "rotate(270, ".concat(String( x(i) + 45 ), ", ", String(h -10), ")");} )
+        .attr("y", h - 10)
+        .attr("x", function(d,i) { return x(i) + 45; })
+        .text( function(d) { return d.Notes; } ) // this sets the name under the bars.
+
+    bars.exit().transition().duration(1000)
+        .selectAll("rect.bar")
+        .attr("height", 0)
+        .attr("y", function(d,i) { return h + .5; });
+    bars.exit().transition().duration(1000)
+        .selectAll("text.valueLabel").attr("opacity",0)
+        .selectAll("text.nameLabel").attr("opacity",0);
+
+    bars.exit().transition().duration(0).delay(1000).remove();
+
+}
+
+function drawBars(compFunctionPresidents, includeOthers){
+    if(includeOthers == 1){
+        dataPresidents = dataWithOthers;
+        var w = 1100; //was 600
+    }else{ //data without others
+        dataPresidents = dataWithOthers.filter(function(d, i){ return d["College"] != "Other";});
+        var w = 600;
+    }
+    var m = 25; 
+    var h = 550,
+        y = d3.scale.linear().domain([0, d3.max(totalCompData) * 1.2]).range([0, h]), //TODO: change the y-scale with toggle (so, without Others, PGann's salary takes up a greater portion of the graph)
+        x = d3.scale.ordinal().domain(d3.range(dataPresidents.length)).rangeBands([0, w - 100], .2);
+        // widen/shrink the x.
+
+    d3.select("#presidents-chart svg").attr("width", w + 80)
+
+    /*var oldbars = d3.selectAll("rect.bar")
+    oldbars.style("display","none");*/
+
+    var chart = d3.selectAll("#presidents-chart g.wholechart")
+
+    bars = chart.selectAll("g.wholechart")
+        .data(dataPresidents.sort(function(d1, d2){ return d2.Base - d1.Base}), function(d){ return d.Person; } ).enter()
+        .append("svg:g")
+        .attr("class", "bar") //This is the group containing the bar itself, the image, etc.
+        .attr("transform", function(d, i) { return "translate(0,20)"; });
+
+    bars.append("svg:rect")
+        .attr("class", "bar")
+        //.attr("id", function(d){return "Presidents" + cleanName(d.Person); })
+        .attr("fill", function(d,i){ return schoolColor(d.College);})
+        .attr("height", function(d,i) { return y(compFunctionPresidents(d)); })
+        .attr("y", function(d,i) { return h - y(compFunctionPresidents(d)) + .5; })
+        .attr("x", function(d,i) { return x(i); })
+        .attr("width", x.rangeBand());//create a second one without padding?
+        // insert or remove the other schools' bars, gray, skinnier than the rest.
+    bars.append("svg:rect") // image boxes
+        .attr("y", function(d) { return h - y(compFunctionPresidents(d)) + 6.5; })
+        .attr("class", "img")
+        .attr("x", function(d,i) { return x(i) + 6; })
+        .attr("fill", function(d, i) { if(d.College != "Other"){ return "url(#prespic" + d.College + ")"; }})
+        .attr("height", (x.rangeBand() - 10 ))
+        .attr("width", (x.rangeBand()) - 10 )
+        .style("display",  function(d, i) { if(d.College != "Other"){ return "block"; }else{ return "none"; }});
+
+    bars.append("svg:text") // Numbers on bars.
+        .attr("y", function(d) { return h - y(compFunctionPresidents(d)) - .5; })
+        .attr("x", function(d,i) { return x(i) + 12 ; })
+        .attr("class", "valueLabel")
+        .attr("dy", function(d) { if(d.College != "Other"){ return 100; }else{ return 20; }})
+        .attr("fill", "white")
+        .attr("text-anchor", "start")
+        .attr("font-size", "1.5em")
+        .text(function(d){ return "$" + String(~~(compFunctionPresidents(d) / 1000)) + "k" });
+
+    bars.append("svg:text") //name labels
+        .attr("y", h)
+        .attr("x", function(d,i) { return x(i) ; })
+        .attr("class","nameLabel")
+        .attr("dy", "1em")
+        .attr("text-anchor", "start")
+        //.attr("transform", "rotate(20)")
+        .text( function(d) { return d.Person; } ); // this sets the name under the bars.
+}

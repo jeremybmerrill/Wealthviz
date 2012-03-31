@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Administration Spending Bar Chart</title>
+    <script type="text/javascript" src="../d3.js"></script>
+    <script type="text/javascript" src="../d3.csv.js"></script>
+    <script type="text/javascript" src="../d3.layout.js"></script>
+    <script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../lib/qtip/jquery.qtip-1.0.0-rc3.min.js"></script>
+    <script type="text/javascript" src="../ajax-switch/jquery.iphone-switch.js"></script>
+    <script type="text/javascript" src="salaryvizutils.js"></script>
+    <link rel="stylesheet" href="salaryviz.css">
+    <style type="text/css">
+
+body {
+  font: 12px sans-serif;
+}
+.infobox{
+  font: 16px serif;
+}
+    </style>
+  </head>
+  <body>
+    <div id="vp-chart" class="chart" style="position: relative; height: 550px;">
+        <script type="text/javascript" src="vp.js"></script>
+        <div id="pres-toggle" class="toggleComp" ><a href="#">Switch to Total Compensation</a></div>
+          <script type="text/javascript">
+            jQuery('.toggleComp').click(function(){
+              toggleCompVP();
+	            var newtext = jQuery('.toggleComp a').text() == 'Switch to Total Compensation' ? 'Switch to Base Compensation' : 'Switch to Total Compensation';
+              jQuery('.toggleComp a').text(newtext);
+            });
+          </script>
+        </div>
+    </div>
+  </body>
+</html

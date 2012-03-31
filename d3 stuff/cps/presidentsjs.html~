@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Presidents Bar Chart</title>
+    <script type="text/javascript" src="../d3.js"></script>
+    <script type="text/javascript" src="../d3.csv.js"></script>
+    <style type="text/css">
+
+body {
+  font: 12px sans-serif;
+}
+
+svg {
+  shape-rendering: crispEdges;
+}
+
+    </style>
+  </head>
+  <body>
+<div id="chart">
+    <script type="text/javascript" src="presidents.js"></script>
+    </div>
+    <div>
+    <a href="#" onclick="toggleComp()">Toggle Base/Total Compensation</a> <a href="#" onclick="toggleOthers()">Toggle Other Schools</a>
+    </div>
+  </body>
+</html>

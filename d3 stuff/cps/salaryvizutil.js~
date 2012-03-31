@@ -1,0 +1,5 @@
+var schoolColors = [{"School":"CMC", "Color":"Maroon"}, 
+                    {"School":"Scripps", "Color":"DarkGreen"}, 
+                    {"School":"Pitzer", "Color":"DarkOrange"}, 
+                    {"School":"Pomona", "Color":"Blue"}, 
+                    {"School":"HMC", "Color":"#cc9933"}];

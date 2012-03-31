@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Presidents Bar Chart</title>
+    <script type="text/javascript" src="../lib/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="../d3.js"></script>
+    <script type="text/javascript" src="../d3.csv.js"></script>
+    <script type="text/javascript" src="../ajax-switch/jquery.iphone-switch.js"></script>
+    <script type="text/javascript" src="salaryvizutils.js"></script>
+    <link rel="stylesheet" href="salaryviz.css">
+
+    <style type="text/css">
+
+body {
+  font: 12px sans-serif;
+}
+
+.switchLabel{
+  font-size: 18px;
+  position: absolute; 
+  top: 50px; 
+  left: 410px;
+}
+.iSwitch{
+  position: absolute; 
+  top: 50px; 
+  left: 550px;
+}
+
+    </style>
+  </head>
+  <body>
+    <div id="presidents-chart" class="chart" style="position: relative; height: 500px;">
+        <script type="text/javascript" src="presidents.js"></script>
+
+        <div id="pres-toggle" class="toggleComp"><a href="#">Switch to Total Compensation</a></div>
+        <script type="text/javascript">
+          jQuery('.toggleComp').click(function(){
+            toggleCompPresidents();
+	          var newtext = jQuery('.toggleComp a').text() == 'Switch to Total Compensation' ? 'Switch to Base Compensation' : 'Switch to Total Compensation';
+            jQuery('.toggleComp a').text(newtext);
+          });
+        </script>
+
+        <div id="iSwitch-pres-label" class="switchLabel">Peer Institutions: </div>
+        <div id="iSwitch-pres" class="iSwitch" >
+            <script type="text/javascript">
+            $('#iSwitch-pres').iphoneSwitch("off",function() {toggleOthers()}, function() { toggleOthers() }, { switch_on_container_path: '../ajax-switch/iphone_switch_container_off.png',  switch_off_container_path: '../ajax-switch/iphone_switch_container_on.png', switch_path: '../ajax-switch/iphone_switch.png',});
+            </script>
+        </div>
+    </div>
+  </body>
+</html>
